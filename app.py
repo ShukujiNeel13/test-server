@@ -1,6 +1,7 @@
+import sys
 import time
 import json
-from pprint import pprint
+from pprint import pprint, pformat
 from flask import Flask, request, make_response, jsonify
 import jwt
 
@@ -11,20 +12,41 @@ app = Flask(__name__)
 def index():
     """Echoes back the request body as response body if one is given."""
 
-    request_status = f'{request.method} request received on index.'
+    _request_path = request.path
+    request_status = f'{request.method} request received on path: {_request_path}'
     print(request_status)
     response_data = {'status': request_status}
 
+    r_content_type = request.content_type
+    print(f'Content type of request is: {r_content_type}')
+    print(f'Type of Content Type in request is: {type(r_content_type)}')
+
+    # request_body = request.data
     request_body = request.data
 
     if request_body:
-        print('Request body given is:')
-        pprint(request_body)
-        # request_body_json_string = request_body.decode('utf-8')
-        # request_body_dict = json.loads(request_body_json_string)
-        # response_data['data'] = request_body_dict
-        # print('Request body given is:')
-        # pprint(request_body_dict)
+
+        print(f'Type of request body received is: {type(request_body)}')
+
+        if request_body:
+
+            if r_content_type == 'application/json':
+
+                try:
+                    _request_body_str = request_body.decode('utf-8')
+                except (UnicodeDecodeError, AttributeError):
+                    print('\nFailed to decode request body (Request body was unexpected type)!', file=sys.stderr)
+                    return
+                print('Request body (decoded string is:)')
+                print(_request_body_str)
+
+                # request_body_dict = json.loads(_request_body_str)
+                # print('Request body given is:')
+                # pprint(request_body_dict)
+        else:
+            print('Content Type was not application/json, will print whatever body received')
+            # print(pformat(request_body))
+            print(request_body)
 
     request_headers = request.headers
 
