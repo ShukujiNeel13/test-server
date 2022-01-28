@@ -69,6 +69,59 @@ def index_with_delay():
     return make_response(jsonify({'status': 'success'}), 200)
 
 
+@app.route('/ping', methods=['GET', 'POST'])
+def ping():
+    """Echoes back the request body as response body if one is given."""
+
+    _request_path = request.path
+    request_status = f'{request.method} request received on path: {_request_path}'
+    print(request_status)
+    response_data = {'status': request_status}
+
+    r_content_type = request.content_type
+    print(f'Content type of request is: {r_content_type}')
+    print(f'Type of Content Type in request is: {type(r_content_type)}')
+
+    # request_body = request.data
+    request_body = request.data
+
+    if request_body:
+
+        print(f'Type of request body received is: {type(request_body)}')
+
+        if request_body:
+
+            if r_content_type == 'application/json':
+
+                try:
+                    _request_body_str = request_body.decode('utf-8')
+                except (UnicodeDecodeError, AttributeError):
+                    print('\nFailed to decode request body (Request body was unexpected type)!', file=sys.stderr)
+                    return
+                print('Request body (decoded string is:)')
+                print(_request_body_str)
+
+                # request_body_dict = json.loads(_request_body_str)
+                # print('Request body given is:')
+                # pprint(request_body_dict)
+        else:
+            print('Content Type was not application/json, will print whatever body received')
+            # print(pformat(request_body))
+            print(request_body)
+
+    request_headers = request.headers
+
+    if request_headers:
+        print('Request Headers given as:')
+        pprint(request_headers)
+
+    # return {'name': 'neel'}
+    # make_response()
+    # return make_response('success')
+
+    return make_response(jsonify(response_data), 200)
+
+
 @app.route('/login', methods=['GET', 'POST'])
 def auth_login():
     """Returns a dummy token in response body"""
@@ -104,5 +157,8 @@ def auth_login():
     return make_response(jsonify(response_data), 200)
 
 
-if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=5000, debug=False)
+@app.route('/matrixevents', methods=['POST'])
+def handle():
+
+    return make_response(jsonify({'success': True}), 200)
+
