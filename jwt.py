@@ -88,12 +88,13 @@ def _check_jwt_signature_valid(b64_encoded_signature: str) -> dict:
     response_data['message'] = 'JWT signature section is valid'
     return response_data
 
+
 # TODO: Get the header from the unhased Signature?
-def _check_header_kid_matches_key(b64_encoded_header_kid: str, algorithm: str = 'RS256', json_filepath_jwt_keys: str = None) -> dict:
+def _check_header_kid_matches_key(kid: str, kid_alg: str = 'RS256', json_filepath_jwt_keys: str = None) -> dict:
     """
     Compare the local key ID (kid) to the public kid.
 
-    :param b64_encoded_header_kid:
+    :param header_kid:
     :param algorithm:
     :param match_how:
     :return:
@@ -101,13 +102,51 @@ def _check_header_kid_matches_key(b64_encoded_header_kid: str, algorithm: str = 
 
     response_data = {
         'status': False,
-        'message': 'Header key id invalid'
+        'message': 'default'
     }
+
+    # region Get keys data from the public jwt keys json file
+    _file_data_name = 'public jwt keys json file'
+
+    get_data_response = _get_data_from_jwt_keys_json_file(json_filepath_jwt_keys)
+    json_file_data = get_data_response['data']
+    get_json_file_message = get_data_response['message']
+
+    if not json_file_data:
+        response_data['message'] = f'Failed to get data from {_file_data_name} ({get_json_file_message})'
+        return response_data
+
+    if 'keys' not in json_file_data:
+        response_data['message'] = f'Required attribute: "keys" missing in {_file_data_name}'
+        return response_data
+    # endregion
+
+    list_of_keys_data = json_file_data['keys']
+
+    # region Ensure keys in data is list
+    _type_keys_data = type(list_of_keys_data)
+
+    if _type_keys_data is not list:
+        response_data['message'] = f'"keys" in {_file_data_name} must be list (but found: {_type_keys_data.__name__}'
+        return response_data
+    # endregion
+
+    no_of_keys_data = len(list_of_keys_data)
+
+    if no_of_keys_data == 1:
+        key_data = list_of_keys_data[0]
+
+    else:
+        # Group by "alg"
+
+    _group_by_alg_resp = _group_jwt_public_keys_by_attribute(
+        list_of_keys_data,
+        attr_name='alg',
+        attr_value=kid_alg
+    )
 
     _key = '?'
     _invalid_status_text = f'Key ID in JWT header section must match the public key id'
-
-    decoded_signature = base64.b64decode(b64_encoded_header_kid)
 
     invalid = True
     if invalid:
@@ -119,15 +158,48 @@ def _check_header_kid_matches_key(b64_encoded_header_kid: str, algorithm: str = 
     return response_data
 
 
-def _get_data_from_public_jwt_keys_file(filepath: str = None) -> dict:
+def _group_jwt_public_keys_by_attribute(keys_data: list, attr_name: str, attr_value: str) -> dict:
 
-    if filepath is None:
+    response_data = {
+        'data': None,
+        'message': 'default'
+    }
+
+    no_of_keys_data = len(keys_data)
+
+    if no_of_keys_data == 1:
+        key_data = keys_data[0]
+    else:
+        for key_data in keys_data:
+
+
+    return response_data
+
+
+def _get_data_from_jwt_keys_json_file(json_filepath: str = None) -> dict:
+
+    response_data = {
+        'data': None,
+        'message': 'default'
+    }
+
+    if json_filepath is None:
         parent_dir_abs_path = os.path.dirname(os.path.abspath(__name__))
-        filepath = f'{parent_dir_abs_path}/_public_jwt_keys.json'
+        json_filepath = f'{parent_dir_abs_path}/_public_jwt_keys.json'
 
-    with open(filepath, mode='r') as f:
-        keys_data = json.load(f)
-        return keys_data
+    with open(json_filepath, mode='r') as f:
+        try:
+            keys_data = json.load(f)
+        except Exception as err:
+            _err_type = type(err).__name__
+            _err_text = str(err)
+
+            err_info = f'{_err_type} loading data from JSON file ({_err_text})'
+            response_data['message'] = err_info
+
+            return response_data
+
+        response_data['data'] = keys_data
 
 # endregion
 
