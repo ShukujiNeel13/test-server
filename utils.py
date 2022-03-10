@@ -1,7 +1,7 @@
 import os
 import logging
 
-import yaml
+# import yaml
 
 import definitions
 
@@ -13,21 +13,22 @@ CHECKER_ATTR_ERROR = definitions.CHECKER_ATTR_STATUS
 # endregion
 
 
-def load_data_from_yaml_file(filepath: str) -> dict:
-    """"""
+# def load_data_from_yaml_file(filepath: str) -> dict:
+#     """"""
+#
+#     print('Loading data from yaml file at given path:')
+#     print(filepath)
+#
+#     if not os.path.isfile(filepath):
+#         raise FileNotFoundError(f'There is no such file: {filepath}')
+#
+#     with open(filepath) as f:
+#         data = yaml.safe_load(f)
+#
+#         print('Data loaded from yaml file as dict.')
+#
+#         return data
 
-    print('Loading data from yaml file at given path:')
-    print(filepath)
-
-    if not os.path.isfile(filepath):
-        raise FileNotFoundError(f'There is no such file: {filepath}')
-
-    with open(filepath) as f:
-        data = yaml.safe_load(f)
-
-        print('Data loaded from yaml file as dict.')
-
-        return data
 def _get_std_log_level_from_input(log_level_input: str) -> int:
 
     input_all_caps = log_level_input.upper()
