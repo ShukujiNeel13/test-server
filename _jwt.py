@@ -8,6 +8,8 @@ import jwt
 
 import utils
 
+
+
 SAMPLE_AUTH_RESPONSE = {
     'code': None,
     'data': {
