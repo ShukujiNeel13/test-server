@@ -36,7 +36,8 @@ def load_env_vars_from_file():
     _absolute_path_project_directory = os.path.dirname(os.path.abspath(__name__))
     print(f'Absolute path to Project directory is:\n{_absolute_path_project_directory}')
 
-    _project_relative_path_to_env_file = definitions.PROJECT_RELATIVE_PATH_TO_ENVIRONMENT_FILE
+    # _project_relative_path_to_env_file = definitions.PROJECT_RELATIVE_PATH_TO_ENVIRONMENT_FILE
+    _project_relative_path_to_env_file = '.env'
     print(f'definition: PROJECT_RELATIVE_PATH_TO_ENVIRONMENT_FILE is:\n{_project_relative_path_to_env_file}')
 
     path_to_environment_file = f'{_absolute_path_project_directory}/{_project_relative_path_to_env_file}'
