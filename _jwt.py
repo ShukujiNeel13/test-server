@@ -4,13 +4,17 @@ import os.path
 from time import time
 from pprint import pformat
 
+import jwt
+
 import utils
 
 SAMPLE_AUTH_RESPONSE = {
     'code': None,
-    'data': {'access_token': 'eyJraWQiOiJRZTlQUXUzYWxcL2cyTzltOHRWMkRHejdkV3NWNjF0WHBVRU9mYnJkTmo4az0iLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiI3YjM1ZnEwM3Nlb2VrNXM3b3ZmNjBqMml2NyIsInRva2VuX3VzZSI6ImFjY2VzcyIsInNjb3BlIjoibWF0cml4LnNvbHV0aW9uc1wvc29sdXRpb25zLm5vdGlmeSIsImF1dGhfdGltZSI6MTY0Njg4MzI4MiwiaXNzIjoiaHR0cHM6XC9cL2NvZ25pdG8taWRwLmFwLXNvdXRoZWFzdC0xLmFtYXpvbmF3cy5jb21cL2FwLXNvdXRoZWFzdC0xX0pKMVBKdE9jViIsImV4cCI6MTY0Njg4Njg4MiwiaWF0IjoxNjQ2ODgzMjgyLCJ2ZXJzaW9uIjoyLCJqdGkiOiJiM2Y3OTBmZi0xOTljLTQzOGMtYjY4Ny1kMzZkYWRjYWU4MGIiLCJjbGllbnRfaWQiOiI3YjM1ZnEwM3Nlb2VrNXM3b3ZmNjBqMml2NyJ9.Zb_cAWrtR9baPrguKdLBy9QMnmE4mT3zruIgv6cA7yFwlbRg8-R62_PUF_Mu_g35lmdB-dDeqanDqz_PjO3ORIDmz0W2mX1XpNmjKWNTHDN_cBGFleabwzIEpregtIkcy5FbZc4LGfCb5kYSSS-NrmZQtnJOTFe2Un9eYT4kSz_rTPYeVKIPyy_AvwxrwnOAmHGSJ-bYt3K10Gl9PDQc3a5i4j39ykBci3tVcVihvPTNP2X-KQcaiHAZ3iMNyO-91eQ0L_VJKlAZgHl1b8hnwbincECLfjEk5Wlh6xXhDIqa4K47rW24-g1ZxDHY8RiFQZ9EGoT3iLI49LSARMiSBg',
-             'expires_in': 3600,
-             'token_type': 'Bearer'},
+    'data': {
+        'access_token': 'eyJraWQiOiJRZTlQUXUzYWxcL2cyTzltOHRWMkRHejdkV3NWNjF0WHBVRU9mYnJkTmo4az0iLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiI3YjM1ZnEwM3Nlb2VrNXM3b3ZmNjBqMml2NyIsInRva2VuX3VzZSI6ImFjY2VzcyIsInNjb3BlIjoibWF0cml4LnNvbHV0aW9uc1wvc29sdXRpb25zLm5vdGlmeSIsImF1dGhfdGltZSI6MTY0Njg4MzI4MiwiaXNzIjoiaHR0cHM6XC9cL2NvZ25pdG8taWRwLmFwLXNvdXRoZWFzdC0xLmFtYXpvbmF3cy5jb21cL2FwLXNvdXRoZWFzdC0xX0pKMVBKdE9jViIsImV4cCI6MTY0Njg4Njg4MiwiaWF0IjoxNjQ2ODgzMjgyLCJ2ZXJzaW9uIjoyLCJqdGkiOiJiM2Y3OTBmZi0xOTljLTQzOGMtYjY4Ny1kMzZkYWRjYWU4MGIiLCJjbGllbnRfaWQiOiI3YjM1ZnEwM3Nlb2VrNXM3b3ZmNjBqMml2NyJ9.Zb_cAWrtR9baPrguKdLBy9QMnmE4mT3zruIgv6cA7yFwlbRg8-R62_PUF_Mu_g35lmdB-dDeqanDqz_PjO3ORIDmz0W2mX1XpNmjKWNTHDN_cBGFleabwzIEpregtIkcy5FbZc4LGfCb5kYSSS-NrmZQtnJOTFe2Un9eYT4kSz_rTPYeVKIPyy_AvwxrwnOAmHGSJ-bYt3K10Gl9PDQc3a5i4j39ykBci3tVcVihvPTNP2X-KQcaiHAZ3iMNyO-91eQ0L_VJKlAZgHl1b8hnwbincECLfjEk5Wlh6xXhDIqa4K47rW24-g1ZxDHY8RiFQZ9EGoT3iLI49LSARMiSBg',
+        'expires_in': 3600,
+        'token_type': 'Bearer'
+    },
     'error': False,
     'message': 'Obtained credential data for client'
 }
@@ -63,38 +67,6 @@ def _check_jwt_token_structure_valid(jwt_token: str) -> dict:
     return response_data
 
 
-def _check_jwt_signature_valid(b64_encoded_signature: str) -> dict:
-    """
-    The JWT signature is a hashed combination of the header and the payload
-
-    (A Key is used to sign this)
-
-    :param b64_encoded_signature:
-    :return:
-    """
-
-    response_data = {
-        'status': False,
-        'message': 'Signature invalid',
-        'jwtVerifyStepNumber': 2
-    }
-
-    _key = '?'
-    _invalid_status_text = f'JWT signature must be key-hashed combination of JWT Header and JWT Payload sections'
-
-    decoded_signature = base64.b64decode(b64_encoded_signature)
-
-    invalid = True
-    if invalid:
-        response_data['message'] += f' ({_invalid_status_text})'
-        return response_data
-
-    response_data['status'] = True
-    response_data['message'] = 'JWT signature section is valid'
-    return response_data
-
-
-# TODO: Get the header from the unhashed Signature?
 def _check_header_kid_matches_any_public_key(local_kid: str, kid_alg: str = 'RS256', json_filepath_jwt_keys: str = None) -> dict:
     """
     Compare the local key ID (kid) to the public kid.
@@ -108,7 +80,8 @@ def _check_header_kid_matches_any_public_key(local_kid: str, kid_alg: str = 'RS2
     response_data = {
         'status': False,
         'message': 'default',
-        'jwtVerifyStepNumber': 3
+        'jwtVerifyStepNumber': 3,
+        'public_key': None
     }
 
     # region Get keys data from the public jwt keys json file
@@ -187,6 +160,25 @@ def _check_header_kid_matches_any_public_key(local_kid: str, kid_alg: str = 'RS2
         if local_kid == public_kid:
             response_data['status'] = True
             response_data['message'] = 'Local kid matched a public kid'
+
+            # region Get public key from public kid data
+            _get_public_key_resp = utils.extract_attr_from_data(
+                key_data,
+                'public key data',
+                'n',
+                str
+            )
+
+            token_public_key = _get_public_key_resp['value']
+            get_public_key_text = _get_public_key_resp['text']
+
+            if token_public_key is None:
+                response_data['message'] = get_public_key_text
+                return response_data
+
+            # endregion
+            response_data['public_key'] = token_public_key
+
         else:
             response_data['message'] = 'Local kid did not match public kid'
 
@@ -205,6 +197,25 @@ def _check_header_kid_matches_any_public_key(local_kid: str, kid_alg: str = 'RS2
             if local_kid == public_kid:
                 response_data['status'] = True
                 response_data['message'] = 'Local kid matched a public kid'
+
+                # region Get public key from public kid data
+                _get_public_key_resp = utils.extract_attr_from_data(
+                    key_data,
+                    'public key data',
+                    'n',
+                    str
+                )
+
+                token_public_key = _get_public_key_resp['value']
+                get_public_key_text = _get_public_key_resp['text']
+
+                if token_public_key is None:
+                    response_data['message'] = get_public_key_text
+                    return response_data
+
+                # endregion
+                response_data['public_key'] = token_public_key
+
                 return response_data
         response_data['message'] = f'local kid did not match any of the public kid having alg = {kid_alg}'
         return response_data
@@ -273,9 +284,11 @@ def _get_data_from_jwt_keys_json_file(json_filepath: str = None) -> dict:
             return response_data
 
         response_data['data'] = keys_data
+        return response_data
 
 
 def _check_token_not_expired():
+    ...
 
 
 # endregion
@@ -367,6 +380,7 @@ def check_jwt_valid(jwt_token: str = None) -> dict:
         return response_data
 
     # endregion
+    token_public_key = _check_header_key_id_valid_resp['public_key']
 
     token_payload = token_sections_by_name['payload']
 
@@ -477,12 +491,50 @@ def check_jwt_valid(jwt_token: str = None) -> dict:
 
     # endregion
 
-    # TODO: Require service op name to verify with token scope
+    decode_jwt_response = _decode_jwt(token=jwt_token, public_key=token_public_key, alg=local_key_alg)
 
+    decoded_jwt_data = decode_jwt_response['data']
+    decoded_jwt_message = decode_jwt_response['message']
+
+    if decoded_jwt_data is None:
+        response_data['message'] = f'Failed to decode JWT token ({decoded_jwt_message})'
+        return response_data
+
+    # Match decoded jwt data with payload
+
+    if decoded_jwt_data == decoded_token_payload_data:
+        response_data['status'] = True
+        response_data['code'] = 'SUCCESS'
+        response_data['message'] = 'JWT token is valid'
+        return response_data
+
+    response_data['message'] = 'JWT token is invalid (signature matching failed)'
+    return response_data
+
+
+def _decode_jwt(token: str, public_key: str, alg: str) -> dict:
+
+    response_data = {
+        'data': None,
+        'message': 'default'
+    }
+
+    try:
+        response = jwt.decode(token, public_key, algorithms=[alg])
+    except Exception as err:
+        _err_type = type(err).__name__
+        _err_text = str(err)
+        err_info = f'{_err_type} decoding using JWT ({_err_text})'
+        response_data['message'] = err_info
+        return response_data
+
+    response_data['data'] = response
+    response_data['message'] = 'Decoded using JWT and given key and algorithm'
+    return response_data
 
 
 if __name__ == '__main__':
-    access_token = ...
+    access_token = 'eyJraWQiOiJRZTlQUXUzYWxcL2cyTzltOHRWMkRHejdkV3NWNjF0WHBVRU9mYnJkTmo4az0iLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiI3YjM1ZnEwM3Nlb2VrNXM3b3ZmNjBqMml2NyIsInRva2VuX3VzZSI6ImFjY2VzcyIsInNjb3BlIjoibWF0cml4LnNvbHV0aW9uc1wvc29sdXRpb25zLm5vdGlmeSIsImF1dGhfdGltZSI6MTY0NjkxMjcyOSwiaXNzIjoiaHR0cHM6XC9cL2NvZ25pdG8taWRwLmFwLXNvdXRoZWFzdC0xLmFtYXpvbmF3cy5jb21cL2FwLXNvdXRoZWFzdC0xX0pKMVBKdE9jViIsImV4cCI6MTY0NjkxNjMyOSwiaWF0IjoxNjQ2OTEyNzI5LCJ2ZXJzaW9uIjoyLCJqdGkiOiJkOTNhZDM4YS1mODRhLTQ5YTAtOTRhMy00YTNhZTVjMmQ4NzEiLCJjbGllbnRfaWQiOiI3YjM1ZnEwM3Nlb2VrNXM3b3ZmNjBqMml2NyJ9.F_PEYoXXHKOAIFKUQe_jGjonI1TCYTu8lTssWGFp8KjS3YDD2W-979GBFzeOkCqF8RiKhHhVOqvwHpVI8NmmElS5e02cYmPMytmDAIYVkYtcLlOKglXNIuwcu1FmNycFA6J6HDbMHxeqY1KyNCIsqOAIXNEDPRYt1jmP_XXKQwRIjGKye4t9Y70vtB8rMX772lTHU2Sh_qLADnQSq1X_mYrw6m1TJGc4ro08EpFRBQTFsW0hB2EKLEuhwLtGHmDKXnyS1Az9_EXWegw03PeCbOCSfSGILymDlWqjAFZY3uVLOyGVHCkCIA3mzHpb1_QC3Zp7Df5Pihb22QLXCwEDfQ'
     response = check_jwt_valid(access_token)
     print(f'Process complete. Response is:\n{pformat(response)}')
 
