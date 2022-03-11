@@ -1,7 +1,7 @@
 import os
 import logging
 
-# import yaml
+import yaml
 from dotenv import load_dotenv
 
 import definitions
@@ -14,21 +14,21 @@ CHECKER_ATTR_ERROR = definitions.CHECKER_ATTR_STATUS
 # endregion
 
 
-# def load_data_from_yaml_file(filepath: str) -> dict:
-#     """"""
-#
-#     print('Loading data from yaml file at given path:')
-#     print(filepath)
-#
-#     if not os.path.isfile(filepath):
-#         raise FileNotFoundError(f'There is no such file: {filepath}')
-#
-#     with open(filepath) as f:
-#         data = yaml.safe_load(f)
-#
-#         print('Data loaded from yaml file as dict.')
-#
-#         return data
+def load_data_from_yaml_file(filepath: str) -> dict:
+    """"""
+
+    print('Loading data from yaml file at given path:')
+    print(filepath)
+
+    if not os.path.isfile(filepath):
+        raise FileNotFoundError(f'There is no such file: {filepath}')
+
+    with open(filepath) as f:
+        data = yaml.safe_load(f)
+
+        print('Data loaded from yaml file as dict.')
+
+        return data
 
 
 def load_env_vars_from_file():
