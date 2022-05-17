@@ -61,6 +61,59 @@ def index():
     return make_response(jsonify(response_data), 200)
 
 
+@app.route('/matrixevents/scparams/v2/actions', methods=['POST'])
+def scparams_v2_actions():
+    """Echoes back the request body as response body if one is given."""
+
+    _request_path = request.path
+    request_status = f'{request.method} request received on path: {_request_path}'
+    print(request_status)
+    response_data = {'message': request_status}
+
+    r_content_type = request.content_type
+    print(f'Content type of request is: {r_content_type}')
+    print(f'Type of Content Type in request is: {type(r_content_type)}')
+
+    # request_body = request.data
+    request_body = request.data
+
+    if request_body:
+
+        print(f'Type of request body received is: {type(request_body)}')
+
+        if request_body:
+
+            if r_content_type == 'application/json':
+
+                try:
+                    _request_body_str = request_body.decode('utf-8')
+                except (UnicodeDecodeError, AttributeError):
+                    print('\nFailed to decode request body (Request body was unexpected type)!', file=sys.stderr)
+                    return
+                # print('Request body (decoded string is:)')
+                # print(_request_body_str)
+
+                request_body_dict = json.loads(_request_body_str)
+                print('Request body given is:')
+                pprint(request_body_dict)
+        else:
+            print('Content Type was not application/json, will print whatever body received')
+            # print(pformat(request_body))
+            print(request_body)
+
+    request_headers = request.headers
+
+    if request_headers:
+        print('Request Headers given as:')
+        pprint(request_headers)
+
+    # return {'name': 'neel'}
+    # make_response()
+    # return make_response('success')
+    response_data['code'] = 'SUCCESS'
+    return make_response(jsonify(response_data), 200)
+
+
 @app.route('/index_with_delay', methods=['GET', 'POST'])
 def index_with_delay():
 
