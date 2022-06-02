@@ -19,7 +19,14 @@ def index():
 
     r_content_type = request.content_type
     print(f'Content type of request is: {r_content_type}')
-    print(f'Type of Content Type in request is: {type(r_content_type)}')
+
+    request_headers = request.headers
+
+    if request_headers:
+        print('Request Headers given as:')
+        pprint(dict(request_headers))
+    else:
+        print('No headers given in this request (cannot be!)')
 
     # request_body = request.data
     request_body = request.data
@@ -28,31 +35,32 @@ def index():
 
         print(f'Type of request body received is: {type(request_body)}')
 
-        if request_body:
+        print('\nRequest data (raw format) is:')
+        print(request_body)
 
-            if r_content_type == 'application/json':
+        if 'x-sc-compression-enabled' in request_headers:
+            sc_compression_enabled = request_headers['x-sc-compression-enabled']
+            print(f'\n "x-sc-compression-enabled" found in headers as: {sc_compression_enabled}')
 
-                try:
-                    _request_body_str = request_body.decode('utf-8')
-                except (UnicodeDecodeError, AttributeError):
-                    print('\nFailed to decode request body (Request body was unexpected type)!', file=sys.stderr)
-                    return
-                print('Request body (decoded string is:)')
-                print(_request_body_str)
-
-                # request_body_dict = json.loads(_request_body_str)
-                # print('Request body given is:')
-                # pprint(request_body_dict)
-        else:
-            print('Content Type was not application/json, will print whatever body received')
-            # print(pformat(request_body))
-            print(request_body)
-
-    request_headers = request.headers
-
-    if request_headers:
-        print('Request Headers given as:')
-        pprint(request_headers)
+        # if request_body:
+        #
+        #     if r_content_type == 'application/json':
+        #
+        #         try:
+        #             _request_body_str = request_body.decode('utf-8')
+        #         except (UnicodeDecodeError, AttributeError):
+        #             print('\nFailed to decode request body (Request body was unexpected type)!', file=sys.stderr)
+        #             return
+        #         print('Request body (decoded string is:)')
+        #         print(_request_body_str)
+        #
+        #         # request_body_dict = json.loads(_request_body_str)
+        #         # print('Request body given is:')
+        #         # pprint(request_body_dict)
+        # else:
+        #     print('Content Type was not application/json, will print whatever body received')
+        #     # print(pformat(request_body))
+        #     print(request_body)
 
     # return {'name': 'neel'}
     # make_response()
