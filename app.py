@@ -17,6 +17,10 @@ def index():
     print(request_status)
     response_data = {'status': request_status}
 
+    if request.query_string:
+        rqs = request.query_string
+        print(f'Query string in request is:\n{rqs}')
+
     r_content_type = request.content_type
     print(f'Content type of request is: {r_content_type}')
 
@@ -223,3 +227,66 @@ def handle():
 
     return make_response(jsonify({'success': True}), 200)
 
+
+@app.route('/scbi/v2/actions', methods=['GET', 'POST'])
+def scbi_v2_actions():
+
+    _request_path = request.path
+    request_status = f'{request.method} request received on path: {_request_path}'
+    print(request_status)
+    """ Example
+    POST request received on path: /scbi/v2/actions
+    """
+    response_data = {'status': request_status}
+
+    if request.query_string:
+        rqs = request.query_string
+        print(f'Query string in request is:\n{rqs}')
+        """ Example:
+        b'op=scbi.shareWebReport&org=RENTALSG&propid=c986a87de1ec42718ed68c69af282022&pid=9a20c722cd364be1a0b3260449764f4b'
+        """
+
+    r_content_type = request.content_type
+    print(f'Content type of request is: {r_content_type}')
+
+    request_headers = request.headers
+
+    if request_headers:
+        print('Request Headers given as:')
+        pprint(dict(request_headers))
+    else:
+        print('No headers given in this request (cannot be!)')
+
+    # request_body = request.data
+    request_body = request.data
+
+    if request_body:
+
+        print(f'Type of request body received is: {type(request_body)}')
+
+        print('\nRequest data (raw format) is:')
+        print(request_body)
+
+        if r_content_type == 'application/json':
+
+            try:
+                _request_body_str = request_body.decode('utf-8')
+            except (UnicodeDecodeError, AttributeError):
+                print('\nFailed to decode request body (Request body was unexpected type)!', file=sys.stderr)
+                return
+            print('Request body (decoded string is:)')
+            print(_request_body_str)
+
+            # request_body_dict = json.loads(_request_body_str)
+            # print('Request body given is:')
+            # pprint(request_body_dict)
+        else:
+            print('Content Type was not application/json, will print whatever body received')
+            # print(pformat(request_body))
+            print(request_body)
+
+    # return {'name': 'neel'}
+    # make_response()
+    # return make_response('success')
+
+    return make_response(jsonify(response_data), 200)
